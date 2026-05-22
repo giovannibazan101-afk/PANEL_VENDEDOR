@@ -242,7 +242,7 @@ h1,h2,h3,h4,.brand{font-family:'Outfit',sans-serif}
 .btn-refresh:hover{border-color:var(--rojo);color:var(--rojo)}
 .btn-refresh.loading{animation:spin 1s linear infinite;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
-#mapaContainer{width:100%;height:calc(100vh - 200px);background:var(--bg3)}
+#mapaContainer{width:100%;height:calc(100vh - 200px);background:#e8e8e0}
 
 /* ── PANEL HISTORIAL ── */
 .hist-section-title{
@@ -305,60 +305,80 @@ h1,h2,h3,h4,.brand{font-family:'Outfit',sans-serif}
 /* ── MODAL DETALLE PEDIDO ── */
 .modal-overlay{
   position:fixed;inset:0;z-index:5000;
-  background:rgba(0,0,0,.75);backdrop-filter:blur(4px);
+  background:rgba(0,0,0,.8);backdrop-filter:blur(6px);
   display:flex;align-items:flex-end;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity .25s ease;
 }
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal-sheet{
-  width:100%;max-width:520px;max-height:90dvh;
+  width:100%;max-width:560px;
+  /* En mobile ocupa hasta 95% de la pantalla, en desktop un poco menos */
+  height:92dvh;max-height:92dvh;
   background:var(--bg2);border-radius:20px 20px 0 0;
   border-top:1px solid var(--border2);
   display:flex;flex-direction:column;
   transform:translateY(100%);transition:transform .3s cubic-bezier(.22,1,.36,1);
   overflow:hidden;
 }
+@media(min-width:600px){
+  .modal-overlay{align-items:center}
+  .modal-sheet{
+    height:auto;max-height:88vh;
+    border-radius:20px;border:1px solid var(--border2);
+    box-shadow:0 32px 80px rgba(0,0,0,.6);
+  }
+}
 .modal-overlay.open .modal-sheet{transform:translateY(0)}
-.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0;flex-shrink:0}
+@media(min-width:600px){.modal-overlay.open .modal-sheet{transform:translateY(0) scale(1)}}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0;flex-shrink:0}
+@media(min-width:600px){.modal-handle{display:none}}
 .modal-header{
   display:flex;align-items:center;gap:10px;
   padding:14px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:var(--bg2);
 }
-.modal-header .modal-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--rojo)}
-.modal-header .modal-title{flex:1;font-size:15px;font-weight:700;color:#fff}
+.modal-header .modal-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--rojo);background:rgba(204,0,0,.1);padding:3px 8px;border-radius:6px;border:1px solid rgba(204,0,0,.2)}
+.modal-header .modal-title{flex:1;font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .modal-close{background:none;border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;color:var(--txt3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
 .modal-close:hover{border-color:var(--rojo);color:var(--rojo)}
-.modal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
-.modal-section{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.modal-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);padding:10px 12px 6px;border-bottom:1px solid var(--border)}
-.modal-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px}
+/* ← CRÍTICO: flex:1 + min-height:0 para que el scroll funcione */
+.modal-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 16px;display:flex;flex-direction:column;gap:10px}
+.modal-section{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;flex-shrink:0}
+.modal-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);padding:9px 12px 7px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.modal-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
 .modal-row:last-child{border-bottom:none}
-.modal-row-label{color:var(--txt3);font-size:11px}
-.modal-row-val{color:#fff;font-weight:600;text-align:right;max-width:65%}
+.modal-row-label{color:var(--txt3);font-size:11px;flex-shrink:0;padding-top:1px}
+.modal-row-val{color:#fff;font-weight:600;text-align:right;word-break:break-word}
 .modal-items-table{width:100%}
 .modal-item-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px}
 .modal-item-row:last-child{border-bottom:none}
 .modal-item-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txt3);background:var(--bg3);padding:2px 6px;border-radius:4px}
 .modal-item-name{color:var(--txt2)}
 .modal-item-qty{background:rgba(204,0,0,.12);color:var(--rojo);font-weight:800;font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:6px;text-align:center;white-space:nowrap}
-.modal-footer{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:8px;background:var(--bg2)}
+.modal-footer{padding:10px 14px 14px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:8px;background:var(--bg2)}
+/* safe area para iPhone */
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  .modal-footer{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+}
 .btn-encamino{
-  width:100%;padding:14px;border-radius:12px;border:none;
+  width:100%;padding:13px;border-radius:12px;border:none;
   background:linear-gradient(135deg,#0277bd,#4fc3f7);color:#fff;
-  font-size:15px;font-weight:800;font-family:'Outfit',sans-serif;
+  font-size:14px;font-weight:800;font-family:'Outfit',sans-serif;
   cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
   transition:all .2s;letter-spacing:.3px;
-  box-shadow:0 4px 20px rgba(79,195,247,.25);
+  box-shadow:0 4px 16px rgba(79,195,247,.2);
 }
 .btn-encamino:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(79,195,247,.35)}
 .btn-encamino:active{transform:translateY(0)}
-.btn-encamino:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-encamino.ya-camino{background:linear-gradient(135deg,#1b5e20,#66bb6a);box-shadow:0 4px 20px rgba(102,187,106,.25)}
+.btn-encamino:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-encamino.ya-camino{background:linear-gradient(135deg,#1b5e20,#66bb6a);box-shadow:0 4px 16px rgba(102,187,106,.2)}
 .modal-footer-row{display:flex;gap:8px}
+.btn-modal-call{flex:1;padding:11px;border-radius:10px;border:1px solid rgba(79,195,247,.3);background:rgba(79,195,247,.1);color:#4fc3f7;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;text-decoration:none}
+.btn-modal-call:hover{background:rgba(79,195,247,.2)}
 .btn-modal-wa{flex:1;padding:11px;border-radius:10px;border:none;background:#25d366;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s}
 .btn-modal-wa:hover{background:#1db954}
-.btn-modal-maps{flex:1;padding:11px;border-radius:10px;border:none;background:rgba(21,101,192,.2);color:#4fc3f7;border:1px solid rgba(21,101,192,.3);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s}
-.btn-modal-maps:hover{background:rgba(21,101,192,.35)}
+.btn-modal-maps{flex:1;padding:11px;border-radius:10px;border:1px solid rgba(21,101,192,.3);background:rgba(21,101,192,.15);color:#4fc3f7;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s}
+.btn-modal-maps:hover{background:rgba(21,101,192,.3)}
 .modal-status-row{display:flex;align-items:center;gap:8px;padding:0}
 .modal-status-label{font-size:11px;color:var(--txt3);white-space:nowrap}
 .modal-status-select{
@@ -806,7 +826,7 @@ function cargarMapa() {
 
 function initMapa() {
   leafletMap = L.map('mapaContainer').setView([-25.28, -57.64], 9);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '©OpenStreetMap ©CartoDB', maxZoom: 19
   }).addTo(leafletMap);
   renderMapaMarkers();
@@ -1016,7 +1036,11 @@ function abrirModal(rowIndex) {
         <span class="modal-row-label">Teléfono / WhatsApp</span>
         <span class="modal-row-val">
           ${telLimpio
-            ? `<a href="${waUrl}" target="_blank" style="color:#25d366;font-weight:700;text-decoration:none">💬 ${p.telefono}</a>`
+            ? `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+                <span style="font-size:12px;color:var(--txt2)">${p.telefono}</span>
+                <a href="tel:+${telLimpio}" style="background:rgba(79,195,247,.15);color:#4fc3f7;border:1px solid rgba(79,195,247,.3);font-weight:700;text-decoration:none;font-size:11px;padding:4px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:4px">📞 Llamar</a>
+                <a href="${waUrl}" target="_blank" style="background:#25d366;color:#fff;font-weight:700;text-decoration:none;font-size:11px;padding:4px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:4px">💬 WhatsApp</a>
+               </div>`
             : '<span style="color:var(--txt3)">No registrado</span>'
           }
         </span>
@@ -1055,14 +1079,25 @@ function abrirModal(rowIndex) {
 
     <!-- ARTÍCULOS -->
     <div class="modal-section">
-      <div class="modal-section-title">🧾 Artículos del pedido (${items.length} ítem${items.length!==1?'s':''})</div>
+      <div class="modal-section-title" style="display:flex;justify-content:space-between;align-items:center;padding-right:12px">
+        <span>🧾 Artículos del pedido</span>
+        <span style="background:var(--rojo);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px">${items.length} ítem${items.length!==1?'s':''} · ${items.reduce((s,i)=>s+i.qty,0)} uds.</span>
+      </div>
       <div class="modal-items-table">
-        ${items.map(i => `
-          <div class="modal-item-row">
-            <span class="modal-item-code">${i.code||'—'}</span>
-            <span class="modal-item-name">${i.name}</span>
-            <span class="modal-item-qty">×${i.qty}</span>
+        <div style="display:grid;grid-template-columns:20px auto 1fr auto;gap:6px;padding:6px 12px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3);border-bottom:1px solid var(--border)">
+          <span>#</span><span>Código</span><span>Descripción</span><span style="text-align:right">Cant.</span>
+        </div>
+        ${items.map((i,idx) => `
+          <div style="display:grid;grid-template-columns:20px auto 1fr auto;gap:6px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px${idx===items.length-1?';border-bottom:none':''}">
+            <span style="font-size:10px;color:var(--txt3);font-weight:700">${idx+1}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txt3);background:var(--bg3);padding:2px 5px;border-radius:4px;white-space:nowrap">${i.code||'—'}</span>
+            <span style="color:var(--txt2);line-height:1.3">${i.name}</span>
+            <span style="background:rgba(204,0,0,.12);color:var(--rojo);font-weight:800;font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 8px;border-radius:6px;text-align:center;white-space:nowrap">×${i.qty}</span>
           </div>`).join('')}
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border);background:var(--bg3)">
+          <span style="font-size:11px;color:var(--txt3)">Total unidades:</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;color:#fff">${items.reduce((s,i)=>s+i.qty,0)}</span>
+        </div>
       </div>
     </div>
 
@@ -1094,8 +1129,9 @@ function abrirModal(rowIndex) {
         ${yaEnCamino ? '🚚 Ya está en camino' : '🚚 Poner en camino'}
       </button>` : ''}
     <div class="modal-footer-row">
-      ${telLimpio ? `<button class="btn-modal-wa" onclick="window.open('${waUrl}','_blank')">💬 WhatsApp cliente</button>` : ''}
-      <button class="btn-modal-maps" onclick="window.open('${mapsUrl}','_blank')">📍 Ver en mapa</button>
+      ${telLimpio ? `<a class="btn-modal-call" href="tel:+${telLimpio}">📞 Llamar</a>` : ''}
+      ${telLimpio ? `<button class="btn-modal-wa" onclick="window.open('${waUrl}','_blank')">💬 WhatsApp</button>` : ''}
+      <button class="btn-modal-maps" onclick="window.open('${mapsUrl}','_blank')">📍 Mapa</button>
     </div>
   `;
 
