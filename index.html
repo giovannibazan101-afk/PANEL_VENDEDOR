@@ -219,6 +219,8 @@ h1,h2,h3,h4,.brand{font-family:'Outfit',sans-serif}
   transition:border-color .2s;appearance:none;text-align:center;
 }
 .pc-status-select.pendiente{border-color:rgba(245,166,35,.4);color:var(--amarillo)}
+.pc-status-select.recepcionado{border-color:rgba(186,104,200,.4);color:#ce93d8}
+.pc-status-select.en-deposito{border-color:rgba(121,134,203,.4);color:#9fa8da}
 .pc-status-select.en-camino{border-color:rgba(79,195,247,.4);color:#4fc3f7}
 .pc-status-select.entregado{border-color:rgba(102,187,106,.4);color:#66bb6a}
 .pc-status-select.cancelado{border-color:rgba(204,0,0,.4);color:#ff5252}
@@ -383,13 +385,15 @@ h1,h2,h3,h4,.brand{font-family:'Outfit',sans-serif}
     <div class="panel active" id="panel-pedidos">
       <div class="stats-bar" id="statsBar">
         <div class="stat-cell total"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
-        <div class="stat-cell pendientes"><div class="stat-num" id="statPend">0</div><div class="stat-label">Pendientes</div></div>
+        <div class="stat-cell pendientes"><div class="stat-num" id="statPend">0</div><div class="stat-label">Por gestionar</div></div>
         <div class="stat-cell camino"><div class="stat-num" id="statCamino">0</div><div class="stat-label">En camino</div></div>
         <div class="stat-cell entregados"><div class="stat-num" id="statEntreg">0</div><div class="stat-label">Entregados</div></div>
       </div>
       <div class="filter-row" id="filterRow">
         <button class="filter-pill active" data-f="todos" onclick="setFilter(this,'todos')">Todos</button>
         <button class="filter-pill" data-f="Pendiente" onclick="setFilter(this,'Pendiente')">⏳ Pendientes</button>
+        <button class="filter-pill" data-f="Recepcionado" onclick="setFilter(this,'Recepcionado')">📋 Recepcionados</button>
+        <button class="filter-pill" data-f="En deposito" onclick="setFilter(this,'En deposito')">🏭 En depósito</button>
         <button class="filter-pill" data-f="En camino" onclick="setFilter(this,'En camino')">🚚 En camino</button>
         <button class="filter-pill" data-f="Entregado" onclick="setFilter(this,'Entregado')">✅ Entregados</button>
         <button class="filter-pill" data-f="Cancelado" onclick="setFilter(this,'Cancelado')">❌ Cancelados</button>
@@ -442,7 +446,7 @@ const VENDEDORES = {
   "JOSE MOLINA":       { zona:"ZV21", pin:"1234", phone:"595981522764", distritos:["CIUDAD DEL ESTE","HERNANDARIAS","MINGA GUAZU","PRESIDENTE FRANCO","SAN ALBERTO","SANTA RITA","FILADELFIA","LOMA PLATA","FUERTE OLIMPO","BAHIA NEGRA"] },
 };
 
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwq3XC3t0Q3SHwLcb7cH1Ntd0uiNjpNxMTOAwNS46eWR4sT6w5mESjBc48mL4NGy-6jSA/exec";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycby5oJQLpS7kOToTZU1MaEoM5dKRFu1YzaUC3IIRlS9-ySbzq1xqPS_-6xnCJrikF3Q9kA/exec";
 const REFRESH_MS = 60000; // auto-refresh cada 60s
 
 let currentVendedor = null;
@@ -549,7 +553,7 @@ async function cargarPedidos(silencioso = false) {
     if (data.pedidos) {
       // Ordenar: más recientes primero, pendientes al tope
       todosLosPedidos = data.pedidos.sort((a,b) => {
-        const order = {'Pendiente':0,'En camino':1,'Entregado':2,'Cancelado':3};
+        const order = {'Pendiente':0,'Recepcionado':1,'En deposito':2,'En camino':3,'Entregado':4,'Cancelado':5};
         if (order[a.estado] !== order[b.estado]) return order[a.estado] - order[b.estado];
         return b.rowIndex - a.rowIndex;
       });
@@ -577,10 +581,11 @@ function renderPedidos() {
 
   // Stats
   document.getElementById('statTotal').textContent = todosLosPedidos.length;
-  document.getElementById('statPend').textContent = todosLosPedidos.filter(p=>p.estado==='Pendiente').length;
+  const activos = todosLosPedidos.filter(p=>['Pendiente','Recepcionado','En deposito'].includes(p.estado)).length;
+  document.getElementById('statPend').textContent = activos;
   document.getElementById('statCamino').textContent = todosLosPedidos.filter(p=>p.estado==='En camino').length;
   document.getElementById('statEntreg').textContent = todosLosPedidos.filter(p=>p.estado==='Entregado').length;
-  document.getElementById('badgePedidos').textContent = todosLosPedidos.filter(p=>p.estado==='Pendiente').length;
+  document.getElementById('badgePedidos').textContent = todosLosPedidos.filter(p=>['Pendiente','Recepcionado'].includes(p.estado)).length;
 
   if (filtrados.length === 0) {
     document.getElementById('pedidoList').innerHTML = `
@@ -626,6 +631,8 @@ function renderPedidos() {
           onchange="cambiarEstado(${p.rowIndex}, this.value, this)"
           title="Cambiar estado">
           <option value="Pendiente" ${p.estado==='Pendiente'?'selected':''}>⏳ Pendiente</option>
+          <option value="Recepcionado" ${p.estado==='Recepcionado'?'selected':''}>📋 Recepcionado</option>
+          <option value="En deposito" ${p.estado==='En deposito'?'selected':''}>🏭 En depósito</option>
           <option value="En camino" ${p.estado==='En camino'?'selected':''}>🚚 En camino</option>
           <option value="Entregado" ${p.estado==='Entregado'?'selected':''}>✅ Entregado</option>
           <option value="Cancelado" ${p.estado==='Cancelado'?'selected':''}>❌ Cancelado</option>
@@ -653,7 +660,15 @@ async function cambiarEstado(rowIndex, nuevoEstado, selectEl) {
     if (data.status === 'ok') {
       // Update local
       const p = todosLosPedidos.find(p => p.rowIndex === rowIndex);
-      if (p) p.estado = nuevoEstado;
+      if (p) {
+        p.estado = nuevoEstado;
+        // ── Notificar al panel cliente vía BroadcastChannel ──
+        try {
+          const bc = new BroadcastChannel('lvp_estado_pedidos');
+          bc.postMessage({ nroPedido: p.nroPedido, nuevoEstado: nuevoEstado });
+          bc.close();
+        } catch(bcErr) { /* navegadores sin soporte */ }
+      }
       selectEl.className = `pc-status-select ${nuevoEstado.toLowerCase().replace(' ','-')}`;
       showToast('✓ Estado actualizado: ' + nuevoEstado);
       renderPedidos(); // re-render para mover de posición
@@ -715,7 +730,7 @@ function renderMapaMarkers() {
     return;
   }
 
-  const colores = { 'Pendiente':'#f5a623', 'En camino':'#4fc3f7', 'Entregado':'#66bb6a', 'Cancelado':'#ff5252' };
+  const colores = { 'Pendiente':'#f5a623', 'Recepcionado':'#ce93d8', 'En deposito':'#9fa8da', 'En camino':'#4fc3f7', 'Entregado':'#66bb6a', 'Cancelado':'#ff5252' };
 
   conUbicacion.forEach((p, i) => {
     const color = colores[p.estado] || '#fff';
@@ -741,7 +756,7 @@ function renderMapaMarkers() {
 // ═══════════════════════════════
 function renderHistorial() {
   const entregados = todosLosPedidos.filter(p => p.estado === 'Entregado' || p.estado === 'Cancelado');
-  const activos = todosLosPedidos.filter(p => p.estado === 'Pendiente' || p.estado === 'En camino');
+  const activos = todosLosPedidos.filter(p => ['Pendiente','Recepcionado','En deposito','En camino'].includes(p.estado));
 
   let html = '';
   if (activos.length > 0) {
@@ -875,7 +890,33 @@ function showToast(msg) {
 initLogin();
 </script>
 
-<!-- NOTA: El Apps Script necesita el código actualizado con soporte para GET
-     (getPedidos) y POST con action=updateEstado. Ver instrucciones abajo. -->
+<!-- ══════════════════════════════════════════════════════════
+     APPS SCRIPT: Agregá esta función para soportar getPedidosByIds
+     (necesario para sincronizar estados con el panel del cliente)
+
+  // En tu Apps Script, dentro de doGet(e), agregá este caso:
+  if (action === 'getPedidosByIds') {
+    const nros = (e.parameter.nros || '').split(',').filter(Boolean);
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Pedidos');
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const colNro    = headers.indexOf('nroPedido');
+    const colEstado = headers.indexOf('estado');
+    if (colNro === -1 || colEstado === -1) {
+      return ContentService.createTextOutput(JSON.stringify({ pedidos: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    const resultado = [];
+    for (let i = 1; i < data.length; i++) {
+      const nro = String(data[i][colNro]).trim();
+      if (nros.includes(nro)) {
+        resultado.push({ nroPedido: nro, estado: String(data[i][colEstado]).trim() });
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ pedidos: resultado }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+     ══════════════════════════════════════════════════════════ -->
 </body>
 </html>
